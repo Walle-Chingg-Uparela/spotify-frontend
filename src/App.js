@@ -28,31 +28,53 @@ function App() {
     setPrediction(null);
 
     try {
+      // 🔥 VALIDACIÓN FRONT (EVITA NaN)
+      if (
+        !form.artists ||
+        !form.album_name ||
+        !form.track_name ||
+        !form.track_genre ||
+        !form.duration_ms ||
+        !form.energy ||
+        !form.danceability
+      ) {
+        throw new Error("Todos los campos son obligatorios");
+      }
+
+      const payload = {
+        ...form,
+        duration_ms: Number(form.duration_ms),
+        energy: Number(form.energy),
+        danceability: Number(form.danceability)
+      };
+
+      console.log("Enviando payload:", payload); // DEBUG
+
       const response = await fetch("https://spotify-api-7yzn.onrender.com/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          ...form,
-          duration_ms: Number(form.duration_ms),
-          energy: Number(form.energy),
-          danceability: Number(form.danceability)
-        })
+        body: JSON.stringify(payload)
       });
 
-      // 🔥 VALIDACIÓN CLAVE
+      const text = await response.text();
+      console.log("Respuesta RAW:", text); // DEBUG CLAVE
+
       if (!response.ok) {
-        const text = await response.text();
         throw new Error(`Error ${response.status}: ${text}`);
       }
 
-      const data = await response.json();
+      const data = JSON.parse(text);
 
-      if (data.predicted_popularity !== undefined) {
+      console.log("Respuesta JSON:", data); // DEBUG
+
+      if (typeof data.predicted_popularity === "number") {
         setPrediction(data.predicted_popularity);
+      } else if (data.error) {
+        throw new Error(data.error);
       } else {
-        throw new Error("La API no devolvió predicción");
+        throw new Error("La API no devolvió predicción válida");
       }
 
     } catch (error) {
