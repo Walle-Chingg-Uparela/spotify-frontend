@@ -50,7 +50,7 @@ function App() {
 
       console.log("Enviando payload:", payload); // DEBUG
 
-      const response = await fetch("https://spotify-api-7yzn.onrender.com/predict", {
+      const response = await fetch("https://spotify-popularity-apiv2.onrender.com/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
